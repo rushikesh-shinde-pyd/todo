@@ -1,0 +1,44 @@
+{% extends "registration/accounts_base.html" %}
+{% load crispy_forms_tags %}
+{% load icons %}
+
+{% block title %} Signup {% endblock title %}
+
+{% block body %}
+<div class="d-flex flex-row-reverse justify-content-center bd-highlight">
+    <div class="p-2 bd-highlight">
+        <div class="card border-primary mt-3">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    {% icon 'tasks' extra_classes='fa-flip-horizontal' %} TODO 
+                </h3>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title text-center">
+                {% if next %}
+                {% if user.is_authenticated %}
+                <div class="alert alert-warning" role="alert">
+                    Your account doesn't have access to this page. To proceed,
+                    please login with an account that has access.
+                </div>    
+                {% else %}
+                <div class="alert alert-warning" role="alert">
+                    Please login to see this page.
+                </div>
+                {% endif %}
+                {% endif %}
+                Signup here
+                </h5>  
+                <form method="POST">
+                    {% csrf_token %}
+                    {% crispy form %}
+                    <!-- <input type="submit" class="btn btn-primary" value="Signup" /> -->
+            </div>
+            <div class="card-footer text-center text-muted">
+                Already have an account? 
+                <a href="{% url 'login' %}">Sign In</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load icons %}
+
+
+
+{% block body %}
+    <div class="d-flex justify-content-start">
+        <div class="jumbotron bg-light">
+            <h1 class="display-4">{{ object.title|title }}</h1>
+            <p class="lead">Are you sure you want to delete your to-do list?</p>
+            <hr class="my-4">
+            <div class="alert alert-warning" role="alert">
+                Changes cannot be undone once made.
+            </div>
+            <!-- <a class="btn btn-info" href="{{ object.get_absolute_url }}" role="button">View List</a> -->
+            <a class="btn btn-danger" href="{{ object.get_list_delete_confirm_url }}" role="button">Delete List</a>
+        </div>
+    </div>
+{% endblock body %}

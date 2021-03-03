@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load icons %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item"><a href="{{ object.get_absolute_url }}">{{ object.title|title }}</a></li>
+{% endblock breadcrumb %}
+
+{% block body %}
+    <div class="d-flex justify-content-start">
+        <div class="jumbotron">
+            <h1 class="display-4">{{ object.title|title }} >> {{ task.title|title }}</h1>
+            <p class="lead">
+                <!-- You are going to delete {{ task.title }} task of {{ object.title }} TO-DO list. -->
+                Are you sure you want to delete ?
+            </p>
+            <hr class="my-4">
+            <div class="alert alert-warning" role="alert">
+                Changes cannot be undone once made.
+            </div>
+            <!-- <a class="btn btn-info" href="{{ object.get_absolute_url }}">{% icon 'tasks' %} View Tasks </a> -->
+            <a class="btn btn-danger" href="{{ task.get_task_delete_confirm_url }}">Delete List</a>
+        </div>
+    </div>
+{% endblock body %}

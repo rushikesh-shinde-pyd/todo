@@ -1,0 +1,54 @@
+{% extends "registration/accounts_base.html" %}
+{% load crispy_forms_tags %}
+{% load icons %}
+
+{% block title %} Login {% endblock title %}
+
+{% block body %}
+  <div class="d-flex flex-row-reverse justify-content-center bd-highlight">
+    <div class="p-2 bd-highlight">
+        <div class="card text-center border-primary mt-5" style="width: 22rem;" >
+            <div class="card-header">
+                <h3 class="mb-0">
+                    {% icon 'tasks' extra_classes='fa-flip-horizontal' %} TODO 
+                </h3>
+              </div>
+            <div class="card-body">
+              <h5 class="card-title">
+                {% if messages %}
+                  <div class="alert alert-success" role="alert">
+                    {{ message }}
+                  </div>    
+                {% endif %}
+                {% if next %}
+                    {% if user.is_authenticated %}
+                    <div class="alert alert-warning" role="alert">
+                        Your account doesn't have access to this page. To proceed,
+                        please login with an account that has access.
+                    </div>    
+
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        Please login to see this page.
+                    </div>
+                    {% endif %}
+                {% endif %}
+                Log In to Your Account
+              </h5>  
+                <form method="POST" class="text-left">
+                  {% csrf_token %}
+                  {{ form|crispy }}           
+                  <div class="d-flex flex-column text-right bd-highlight">
+                    <button type="submit" class="btn btn-primary w-100">Log In</button>
+                    <a href="{% url 'password_reset' %}" class="mt-2">Forgot password?</a>
+                  </div>     
+                </form>
+            </div>
+            <div class="card-footer text-muted">
+                Need an account? 
+                <a href="{% url 'core:signup' %}">Sign up</a>
+              </div>
+          </div>
+    </div>
+  </div>
+{% endblock %}

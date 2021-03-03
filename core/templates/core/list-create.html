@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load icons %}
+{% load crispy_forms_tags %}
+
+{% block title %} Create list {% endblock title %}
+
+{% block body %}
+    <div class="d-flex justify-content-start">
+        <div class="card" style="width: 25rem">
+            <div class="card-header text-center">
+                Create list
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ request.path }}">
+                    {% csrf_token %}
+                    {% crispy form %}
+                </form> 
+            </div>
+        </div>
+    </div>
+{% endblock body %}

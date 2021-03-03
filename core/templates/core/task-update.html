@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load icons %}
+
+{% block title %} {{ object.title|capfirst }} update {% endblock title %}
+
+{% block body %}
+    <div class="row mt-2">
+        <div class="col-sm">    
+            <form method="POST" action="{{ object.get_list_update_url }}">
+                {% csrf_token %}
+                <div class="form-group">
+                  <label for="exampleInputEmail1">Task title</label>
+                  <input type="text" minlength="3" maxlength="50" name="list-title" value="{{ object.title }}" required class="form-control" placeholder="Update ToDo list" aria-label="Update ToDo list" aria-describedby="basic-addon2">
+                  <small id="emailHelp" class="form-text text-muted">Title should not be greater than 50 characters in length.</small>
+                </div>
+                <div class="form-group">
+                    <select name="action" class="form-control" id="exampleFormControlSelect1">
+                        <option {% if object.action == 'pending' %} selected {% endif %} value="pending">Pending</option>
+                        <option {% if object.action == 'on-going' %} selected {% endif %} value="on-going">On-going</option>
+                        <option {% if object.action == 'completed' %} selected {% endif %} value="completed">Completed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Update</button>
+            </form>        
+        </div>
+    </div>
+{% endblock body %}
+
+
+
