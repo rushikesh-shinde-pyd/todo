@@ -2,7 +2,7 @@
 {% load icons %}
 
 {% block body %}
-    <div class="row g-2 my-2">
+    <!-- <div class="row g-2 my-2">
         <div class="col-sm">
             <button class="btn btn-primary rounded-circle" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
                 
@@ -24,11 +24,11 @@
                 </form>            
               </div>
         </div>
-    </div>
+    </div> -->
     <!-- <div class="row"> -->
         {% for each in list %}
         <!-- <div class="col-md-6 col-sm-6 col-lg-4 col-xl-3"> -->
-            <div class="card pull-left m-2" style="width: 20rem;">
+            <div class="card pull-left mb-2 mr-2" style="width: 20rem;">
                 <div class="card-header">
                     {% if each.is_pinned %}
                         {% icon 'thumb-tack' title='Pinned' extra_classes='pr-2' %} {{ object.title|title }}

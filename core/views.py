@@ -9,42 +9,30 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-# third-party imports
-
 # local imports
 from .models import *
-from .forms import SignupForm, ListCreateForm, ListUpdateForm
+from .forms import SignupForm, ListForm, TaskForm
 
 
 User = get_user_model()
 
-def get_cleaned_data(data):
-    print(data)
-    cleaned_data = {}
-    for key, value in data.items():
-        if value.strip():
-            cleaned_data[key] = value.strip()
-        else:
-            cleaned_data = None
-            break
-    return cleaned_data
-
 
 @login_required
 def index(request):
+    """ Renders lists created by logged in user. ie. homepage """
+
     context = {}
-    # context['pending'] = TodoItem.objects.filter(action='pending').order_by('title')
-    context['list'] = TodoList.objects.filter(user=request.user, is_pinned=True)
-    print(context['list'], request.user)
+    context['list'] = TodoList.objects.filter(user=request.user)
     return render(request, 'core/index.html', context)
 
 
 # TODO list operations
 @login_required
 def list_create(request, *args, **kwargs):
+    """ Create todo list with provided data and render empty form. """
     context = {}
     if request.method == 'POST':
-        form = ListCreateForm(request.POST)
+        form = ListForm(request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
             obj.user = request.user
@@ -55,39 +43,17 @@ def list_create(request, *args, **kwargs):
             context['form'] = form
             return render(request, 'core/list-create.html', context)
     else:
-        context['form'] = ListCreateForm()
+        context['form'] = ListForm()
         return render(request, 'core/list-create.html', context)
     
 
 @login_required
 def list_update(request, *args, **kwargs):
+    """ Update todo list. """
     context = {}
-    # if request.method == 'POST':
-    #     cleaned_data = get_cleaned_data(request.POST)
-    #     if cleaned_data:
-    #         instance = TodoList.objects.get(slug=kwargs.get('title'))
-    #         instance.title       = cleaned_data.get('list-title', instance.title)
-    #         instance.is_pinned   = True if cleaned_data.get('is_pinned') else False
-    #         try:
-    #             instance.save()
-    #         except IntegrityError as e:
-    #             messages.error(request, 'List name already exists')
-    #             return HttpResponseRedirect(reverse('core:list-update', kwargs={'title': kwargs.get('title')}))
-    #         else:
-    #             instance.refresh_from_db()
-    #             messages.success(request, 'List updated')
-    #             return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
-    #     else:
-    #         messages.error(request, 'Invalid list name')
-    #         return HttpResponseRedirect(reverse('core:list-update', kwargs={'title': kwargs.get('title')}))
-    # elif request.method == 'GET':
-    #     context['object'] = TodoList.objects.get(slug=kwargs.get('title'))
-    #     return render(request, 'core/list-update.html', context)
     if request.method == 'POST':
-        form = ListCreateForm(request.POST)
-        # obj = TodoList.objects.get(slug=kwargs.get('title'), user=request.user)
+        form = ListForm(request.POST)
         if form.is_valid():
-            form = ListCreateForm(request.POST, instance=obj)
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
@@ -98,13 +64,14 @@ def list_update(request, *args, **kwargs):
             return render(request, 'core/list-update.html', context)
     else:
         obj = TodoList.objects.get(slug=kwargs.get('title'), user=request.user)
-        context['form'] = ListCreateForm(instance=obj)
+        context['form'] = ListForm(instance=obj)
         return render(request, 'core/list-update.html', context)
 
 
 
 @login_required
 def list_detail(request, *args, **kwargs):
+    """ Renders todo list details. """
     context = {}
     try:
         obj = TodoList.objects.get(slug=kwargs.get('title'))
@@ -117,6 +84,7 @@ def list_detail(request, *args, **kwargs):
 
 @login_required
 def list_delete(request, *args, **kwargs):
+    """ Prompts user for the deletion of todo list. """
     context = {}
     try:
         obj = TodoList.objects.get(slug=kwargs.get('title'))
@@ -129,6 +97,7 @@ def list_delete(request, *args, **kwargs):
 
 @login_required
 def list_delete_confirm(request, *args, **kwargs):
+    """ Delete todo list after confirmation. """
     context = {}
     try:
         obj = TodoList.objects.get(slug=kwargs.get('title'))
@@ -143,68 +112,58 @@ def list_delete_confirm(request, *args, **kwargs):
 
 @login_required
 def task_create(request, *args, **kwargs):
+    """ Creates task and add to the list. """
     context = {}
-    try:
-        if request.method == 'POST':
-            data = request.POST
-            cleaned_data = get_cleaned_data(request.POST)
-            print(cleaned_data)
-            if cleaned_data:
-                queryset = TodoItem.objects.filter(title=cleaned_data.get('task-title'))
-                if queryset.exists():
-                    messages.error(request, 'Task name already exists')
-                    context['object'] = TodoList.objects.get(slug=kwargs.get('title'))
-                    context['task_title'] = cleaned_data.get('task-title')
-                    return render(request, 'core/task-create.html', context)
-                else:            
-                    l = TodoList.objects.get(slug=kwargs.get('title'))
-                    obj = TodoItem.objects.create(td_list=l, title=cleaned_data.get('task-title').lower(), action=cleaned_data.get('action'))
-                    messages.success(request, '"%s" task created'%(obj.title.title()))
-                    return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': kwargs.get('title')}))
-            else:
-                print('sadfasfd')
-                context['object'] = TodoList.objects.get(slug=kwargs.get('title'))
-                messages.error(request, 'Invalid list name')
-                return render(request, 'core/task-create.html', context)
-        elif request.method == 'GET':
-            print('yass')
-            context['object'] = TodoList.objects.get(slug=kwargs.get('title'))
+    instance = TodoList.objects.get(slug=kwargs.get('title'))
+    if request.method == 'POST':
+        form = TaskForm(request.POST)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.td_list = instance
+            obj.save()
+            messages.success(request, '"%s" task created'%(obj.title.title()))
+            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+        else:
+            context['form'] = form
+            context['object'] = instance
             return render(request, 'core/task-create.html', context)
-    except Exception as e:
-        print('*'*10, e)
-        return HttpResponseNotAllowed('<h1>Not allowed method</h1>')
-
+    else:
+        context['object'] = instance
+        context['form'] = TaskForm()
+        return render(request, 'core/task-create.html', context)
+    
 
 @login_required
 def task_update(request, *args, **kwargs):
+    """ Update todo task. """
     context = {}
+    instance = TodoList.objects.get(slug=kwargs.get('title'))
+    obj = TodoItem.objects.get(slug=kwargs.get('task'))
     if request.method == 'POST':
-        cleaned_data = get_cleaned_data(request.POST)
-        if cleaned_data:
-            instance = TodoItem.objects.get(slug=kwargs.get('task'))
-            instance.title       = cleaned_data.get('list-title', instance.title)
-            instance.action      = cleaned_data.get('action')
-            try:
-                instance.save()
-            except IntegrityError as e:
-                messages.error(request, 'Task title already exists')
-                return HttpResponseRedirect(reverse('core:task-update', kwargs={'title': kwargs.get('title'), 'task': kwargs.get('task')}))
-            else:
-                instance.refresh_from_db()
-                messages.success(request, 'Task updated')
-                print('something')
-                return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+        form = TaskForm(request.POST, instance=obj)
+        if form.is_valid():
+            print(obj, form.cleaned_data)
+            obj.td_list = instance
+            obj.title = form.cleaned_data.get('title', obj.title)
+            obj.action = form.cleaned_data.get('action', obj.action)
+            obj.save()
+            messages.success(request, '"%s" task updated'%(obj.title.title()))
+            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
         else:
-            messages.error(request, 'Invalid task name')
-            return HttpResponseRedirect(reverse('core:list-update', kwargs={'title': kwargs.get('title'), 'task': kwargs.get('task')}))
-    elif request.method == 'GET':
-        context['object'] = TodoItem.objects.get(slug=kwargs.get('task'))
-        context['list'] = TodoList.objects.get(slug=kwargs.get('title'))
+            context['form'] = form
+            context['object'] = instance
+            context['task'] = obj
+            return render(request, 'core/task-update.html', context)
+    else:
+        context['object'] = instance
+        context['task'] = obj
+        context['form'] = TaskForm(instance=obj)
         return render(request, 'core/task-update.html', context)
-
+    
 
 @login_required
 def task_delete(request, *args, **kwargs):
+    """ Prompts user for the deletion of todo task. """
     context = {}
     try:
         obj = TodoList.objects.get(slug=kwargs.get('title'))
@@ -219,6 +178,7 @@ def task_delete(request, *args, **kwargs):
 
 @login_required
 def task_delete_confirm(request, *args, **kwargs):
+    """ Delete todo task after confirmation. """
     context = {}
     try:
         obj = TodoItem.objects.get(slug=kwargs.get('task'))
@@ -231,21 +191,13 @@ def task_delete_confirm(request, *args, **kwargs):
 
 @login_required
 def profile(request, *args, **kwargs):
+    """ Display details of logged in user. """
     context = {}
-    context['list'] = TodoList.objects.filter(user=request.user)
     return render(request, 'registration/profile.html', context)
 
 
-# def check_user(user):
-#     if user.is_authenticated:
-#         # print(user, '*'*10)
-#         # return redirect('/login/')
-#         return None
-
-
-# @user_passes_test(check_user, login_url='/')
 def signup(request, *args, **kwargs):
-    print(request.user)
+    """ Render signup form and create user and profile object. """
     context = {}
     if request.method == 'POST':
         form = SignupForm(request.POST)

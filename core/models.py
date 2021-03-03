@@ -17,6 +17,7 @@ User = get_user_model()
 
 
 class CommonFields(models.Model):
+    """ Base class for TODOLIST and TODOITEM class. """
     title           =   models.CharField(max_length=50, unique=True) 
     date_created    =   models.DateTimeField('created', auto_now_add=True, editable=False, blank=True)
     date_updated    =   models.DateTimeField('updated', auto_now=True, editable=False, blank=True)
@@ -24,6 +25,7 @@ class CommonFields(models.Model):
 
 
 class Profile(models.Model):
+    """ Create profile table for user. """
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     picture = models.FileField('profile picture', upload_to='profile_pictures', null=True, blank=True)
     dob = models.DateField('Date of Birth', null=True, blank=True)
@@ -36,6 +38,7 @@ class Profile(models.Model):
 
 
 class TodoList(CommonFields):
+    """ Create todolist table. """
     user      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lists', null=True)
     is_pinned = models.BooleanField(default=False, null=True) 
 
@@ -63,6 +66,7 @@ class TodoList(CommonFields):
 
 
 class TodoItem(CommonFields):
+    """ Create todo-item table. """
     td_list         = models.ForeignKey(TodoList, on_delete=models.CASCADE, related_name='list', null=True, blank=True)
     action          = models.CharField(choices=ACTIONS, max_length=50, null=True, default=ACTIONS[0][0])
 

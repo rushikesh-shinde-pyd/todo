@@ -18,6 +18,7 @@ User = get_user_model()
 
 
 class SignupForm(forms.Form):
+    """ Todo signup form. """
     first_name = forms.CharField(max_length=20, min_length=3)
     last_name = forms.CharField(max_length=20, min_length=3)
     username = forms.CharField(max_length=20, min_length=3)
@@ -118,7 +119,8 @@ class SignupForm(forms.Form):
             raise ValidationError('Password did not match')
             
 
-class ListCreateForm(forms.ModelForm):
+class ListForm(forms.ModelForm):
+    """ Todo list create and update form. """
     class Meta:
         model = TodoList
         fields = ('title', 'is_pinned')
@@ -156,32 +158,38 @@ class ListCreateForm(forms.ModelForm):
             Submit('submit', 'Create list', css_class='w-100')
         )
 
-# class ListUpdateForm(ListCreateForm):
-#     def clean_title(self):
-#         title = self.cleaned_data.get('title')
-#         if not title:
-#             raise ValidationError('Invalid title')
-#         else:
-#             if not 2 < len(title) < 50:
-#                 raise ValidationError('Invalid list name')
-#             if TodoList.objects.filter(title=title).exists():
-#                 raise ValidationError('List name already taken')
-#         return title
 
+class TaskForm(forms.ModelForm):
+    """ Todo task create and update form. """
+    class Meta:
+        model = TodoItem
+        fields = ('title', 'action')
+        help_texts = {
+            'title': 'List name must be 3 to 50 character long'
+        }
 
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.helper = FormHelper()
-#         self.helper.layout = Layout(
-#             Row(
-#                 Column('title', css_class='form-group mb-0'),
-#                 css_class='form-row'
-#             ),
-#             Row(
-#                 Column('is_pinned', css_class='form-group mb-0'),
-#                 css_class='form-row'
-#             ),
-#             Submit('submit', 'Save changes', css_class='w-100'),
-#         )
+    def clean_title(self):
+        title = self.cleaned_data.get('title')
+        if not title:
+            raise ValidationError('Invalid title')
+        else:
+            if not 2 < len(title) < 50:
+                raise ValidationError('Invalid task name')
+            if TodoItem.objects.filter(title=title).exists():
+                raise ValidationError('Task name already taken')
+        return title
 
-# # 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Row(
+                Column('title', css_class='form-group mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('action', css_class='form-group mb-0'),
+                css_class='form-row'
+            ),
+            Submit('submit', 'Create task', css_class='w-100')
+        )
