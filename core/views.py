@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils.text import slugify
 from django.db import IntegrityError
+from django.db.models import Q
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -13,6 +14,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import *
 from .forms import SignupForm, ListForm, TaskForm
 
+# third-party imports
+from itertools import chain
 
 User = get_user_model()
 
@@ -37,7 +40,7 @@ def list_create(request, *args, **kwargs):
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
-            messages.success(request, '"%s" list created'%(obj.title.title()))
+            messages.success(request, '"%s" list created'%(obj.title))
             return HttpResponseRedirect(reverse('core:index'))
         else:
             context['form'] = form
@@ -52,13 +55,18 @@ def list_update(request, *args, **kwargs):
     """ Update todo list. """
     context = {}
     if request.method == 'POST':
-        form = ListForm(request.POST)
+        obj = TodoList.objects.get(slug=kwargs.get('title'))
+        form = ListForm(request.POST, instance=obj)
         if form.is_valid():
-            obj = form.save(commit=False)
-            obj.user = request.user
-            obj.save()
-            messages.success(request, '"%s" list created'%(obj.title.title()))
-            return HttpResponseRedirect(reverse('core:index'))
+            if form.has_changed():
+                obj = form.save(commit=False)
+                obj.user = request.user
+                obj.save()
+                messages.success(request, '"%s" list updated'%(obj.title))
+                return HttpResponseRedirect(reverse('core:index'))
+            else:
+                messages.info(request, 'Nothing has updated')
+                return HttpResponseRedirect(reverse('core:index'))
         else:
             context['form'] = form
             return render(request, 'core/list-update.html', context)
@@ -101,7 +109,7 @@ def list_delete_confirm(request, *args, **kwargs):
     context = {}
     try:
         obj = TodoList.objects.get(slug=kwargs.get('title'))
-        messages.success(request, '"%s" deleted'%(obj.title.title()))
+        messages.success(request, '"%s" deleted'%(obj.title))
         obj.delete()
         return HttpResponseRedirect(reverse('core:index'))
     except TodoList.DoesNotExist as e:
@@ -121,7 +129,7 @@ def task_create(request, *args, **kwargs):
             obj = form.save(commit=False)
             obj.td_list = instance
             obj.save()
-            messages.success(request, '"%s" task created'%(obj.title.title()))
+            messages.success(request, '"%s" task created'%(obj.title))
             return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
         else:
             context['form'] = form
@@ -142,13 +150,15 @@ def task_update(request, *args, **kwargs):
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=obj)
         if form.is_valid():
-            print(obj, form.cleaned_data)
-            obj.td_list = instance
-            obj.title = form.cleaned_data.get('title', obj.title)
-            obj.action = form.cleaned_data.get('action', obj.action)
-            obj.save()
-            messages.success(request, '"%s" task updated'%(obj.title.title()))
-            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+            if form.has_changed():
+                obj = form.save(commit=False)
+                obj.td_list = instance
+                obj.save()
+                messages.success(request, '"%s" task updated'%(obj.title))
+                return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+            else:
+                messages.info(request, 'Nothing has updated')
+                return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
         else:
             context['form'] = form
             context['object'] = instance
@@ -182,7 +192,7 @@ def task_delete_confirm(request, *args, **kwargs):
     context = {}
     try:
         obj = TodoItem.objects.get(slug=kwargs.get('task'))
-        messages.success(request, '"%s" deleted'%(obj.title.title()))
+        messages.success(request, '"%s" deleted'%(obj.title))
         obj.delete()
         return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': kwargs.get('title')}))
     except TodoList.DoesNotExist as e:
@@ -224,3 +234,24 @@ def signup(request, *args, **kwargs):
     else:        
         context['form'] = SignupForm()
         return render(request, 'registration/signup.html', context)
+
+def search_list_or_task(request, *args, **kwargs):
+    context = {}
+    q = request.GET.get('query').strip()
+    if q:
+        if TodoList.objects.filter(Q(user=request.user, title__iexact=q)).exists():
+            obj = TodoList.objects.get(user=request.user, title__iexact=q)
+            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': obj.slug}))
+        else:   
+            lists = TodoList.objects.filter(
+                    Q(user=request.user) &
+                    Q(title__icontains=q)
+                ).distinct()
+            tasks = TodoItem.objects.filter(
+                    Q(td_list__user=request.user) &
+                    Q(title__icontains=q)
+                ).distinct()
+            context['results'] = list(chain(lists, tasks))
+            return render(request, 'core/search-results.html', context)
+    else:
+        return render(request, 'core/search-results.html', context)

@@ -2,32 +2,7 @@
 {% load icons %}
 
 {% block body %}
-    <!-- <div class="row g-2 my-2">
-        <div class="col-sm">
-            <button class="btn btn-primary rounded-circle" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                
-            </button>
-            
-            <div class="collapse mt-2" id="collapseExample">
-                <form method="POST" action="{% url 'core:list-create' %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                      <label for="exampleInputEmail1">List title</label>
-                      <input type="text" minlength="3" maxlength="50" name="list-title" value="{{ object.title }}" required class="form-control" aria-describedby="basic-addon2">
-                      <small id="emailHelp" class="form-text text-muted">Title should not be greater than 50 characters in length.</small>
-                    </div>
-                    <div class="form-group form-check">
-                      <input type="checkbox" name="is_pinned" {% if object.is_pinned %} checked "{% endif %} class="form-check-input" id="exampleCheck1">
-                      <label class="form-check-label" for="exampleCheck1">Pin to homepage</label>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create {% icon 'check' %}</button>
-                </form>            
-              </div>
-        </div>
-    </div> -->
-    <!-- <div class="row"> -->
         {% for each in list %}
-        <!-- <div class="col-md-6 col-sm-6 col-lg-4 col-xl-3"> -->
             <div class="card pull-left mb-2 mr-2" style="width: 20rem;">
                 <div class="card-header">
                     {% if each.is_pinned %}
@@ -39,8 +14,8 @@
                     <ul class="list-group list-group-flush">
                     {% for item in each.list.all|slice:":2" %}
                         <li class="list-group-item">
-                            {{ item.title|title }}
-                            <span class="badge 
+                            {{ item.title|capfirst }}
+                            <span class="badge text-light
                             {% if item.action == 'pending' %} bg-secondary
                             {% elif item.action == 'on-going' %} bg-warning
                             {% elif item.action == 'completed' %} bg-success

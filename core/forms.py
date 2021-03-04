@@ -130,7 +130,13 @@ class ListForm(forms.ModelForm):
         help_texts = {
             'title': 'List name must be 3 to 50 character long',
             'is_pinned': 'Set list to homepage as pinned'
+        },
+        error_messages = {
+            'title': {
+                'unique': 'List name already exists'
+            }
         }
+        
 
     def clean_title(self):
         title = self.cleaned_data.get('title')
@@ -139,8 +145,6 @@ class ListForm(forms.ModelForm):
         else:
             if not 2 < len(title) < 50:
                 raise ValidationError('Invalid list name')
-            if TodoList.objects.filter(title=title).exists():
-                raise ValidationError('List name already taken')
         return title
 
     def __init__(self, *args, **kwargs):
@@ -167,6 +171,11 @@ class TaskForm(forms.ModelForm):
         help_texts = {
             'title': 'List name must be 3 to 50 character long'
         }
+        error_messages = {
+            'title': {
+                'unique': 'Task name already exists'
+            }
+        }
 
     def clean_title(self):
         title = self.cleaned_data.get('title')
@@ -175,8 +184,8 @@ class TaskForm(forms.ModelForm):
         else:
             if not 2 < len(title) < 50:
                 raise ValidationError('Invalid task name')
-            if TodoItem.objects.filter(title=title).exists():
-                raise ValidationError('Task name already taken')
+            # if TodoItem.objects.filter(title=title).exists():
+            #     raise ValidationError('Task name already taken')
         return title
 
     def __init__(self, *args, **kwargs):

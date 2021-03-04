@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load icons %}
+
+{% block title %}
+    Search results
+{% endblock title %}
+
+{% block body %}
+    <div class="list-group list-group-flush">
+        <p>Found results: {{ results|length }}</p>
+        {% for each in results %}
+            {% if each.get_absolute_url %}
+                <a href="{{ each.get_absolute_url }}" class="list-group-item list-group-item-action">
+                    <span class="badge badge-secondary">List</span>
+                    {{ each.title|capfirst }}
+                </a>    
+            {% else  %}
+                <a href="{{ each.td_list.get_absolute_url }}" class="list-group-item list-group-item-action">
+                    <span class="badge badge-dark">Task</span>
+                    {{ each.title|capfirst }} >> {{ each.td_list.title|capfirst }}
+                </a>    
+            {% endif %}
+        {% empty %}
+            <p>No results found</p>
+        {% endfor %}
+    </div>
+{% endblock body %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

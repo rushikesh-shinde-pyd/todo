@@ -10,70 +10,65 @@
 {% endblock title %}
 
 {% block body %}
-    <div class="row mt-2">
-        <div class="col-sm">
-            <div class="card">
-                <div class="card-header">
-                    <div class="row">
-                        <div class="col-sm">
-                            {% if object.is_pinned %}
-                                {% icon 'thumb-tack' extra_classes='pr-2' %} 
-                            {% endif %}
-                            {{ object.title|title }}
-                        </div>
-                        <div class="col-sm text-right">
-                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
-                                <a class="btn btn-warning" href="{% url 'core:task-create' object.slug %}">{% icon 'plus' title='Add task' %}</a>
-                                <a class="btn btn-info" href="{{ object.get_list_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
-                                <a class="btn btn-danger" href="{{ object.get_list_delete_url }}">{% icon 'trash' title='Delete' %}</a>
-                            </div>        
-                        </div>
-                    </div>
-                    
-                </div>
-                <div class="card-body py-0">
-                    {% if object.list.count %}
-                    <table class="table table-borderless table-hover">
-                        <thead>
-                          <tr>
-                            <th scope="col">#</th>
-                            <th scope="col">Title</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Created on</th>
-                            <th scope="col">Updated on</th>
-                            <th scope="col">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in object.list.all %}
-                            <tr>
-                                <th scope="row">{{ forloop.counter }}</th>
-                                <td>{{ item.title|title }}</td>
-                                <td>
-                                    <span class="badge 
-                                    {% if item.action == 'pending' %} bg-secondary
-                                    {% elif item.action == 'on-going' %} bg-warning
-                                    {% elif item.action == 'completed' %} bg-success
-                                    {% endif %}
-                                    ">{{ item.action|title }}</span>
-                                </td>
-                                <td>{{ item.date_created }}</td>
-                                <td>{{ item.date_updated }}</td>
-                                <td>
-                                    <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
-                                        <a class="btn btn-info" href="{{ item.get_task_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
-                                        <a class="btn btn-danger" href="{{ item.get_task_delete_url }}">{% icon 'remove' title='Delete' %}</a>
-                                    </div>   
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    {% else %}
-                        <small id="emailHelp" class="form-text text-muted">- Empty list</small>
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    {% if object.is_pinned %}
+                        {% icon 'thumb-tack' extra_classes='pr-2' %} 
                     {% endif %}
+                    {{ object.title|capfirst }}
                 </div>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+                    <a class="btn btn-light mr-1 btn-outline-primary rounded-0" href="{% url 'core:task-create' object.slug %}">{% icon 'plus' title='Add task' %} Add a task</a>
+                    <a class="btn btn-primary rounded-circle mr-1" href="{{ object.get_list_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
+                    <a class="btn btn-danger rounded-circle mr-1" href="{{ object.get_list_delete_url }}">{% icon 'trash' title='Delete' %}</a>
+                </div>       
             </div>
+        </div>
+        <div class="card-body p-0">
+            {% if object.list.count %}
+            <table class="table mb-0 table-borderless table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Updated</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for item in object.list.all %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ item.title|capfirst }}</td>
+                        <td>
+                            <span class="text-light badge 
+                            {% if item.action == 'pending' %} bg-secondary
+                            {% elif item.action == 'on-going' %} bg-warning
+                            {% elif item.action == 'completed' %} bg-success
+                            {% endif %}
+                            ">{{ item.action|title }}</span>
+                        </td>
+                        <td>{{ item.date_created|timesince }} ago</td>
+                        <td>{{ item.date_updated|timesince }} ago</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
+                                <a class="btn btn-outline-success" href="{{ item.get_task_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
+                                <a class="btn btn-outline-danger" href="{{ item.get_task_delete_url }}">{% icon 'remove' title='Delete' %}</a>
+                            </div>   
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div>
+                    <small id="emailHelp" class="form-text text-muted">- Empty list</small>
+                </div>
+            {% endif %}
         </div>
     </div>
 {% endblock body %}

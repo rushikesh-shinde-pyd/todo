@@ -20,4 +20,7 @@ urlpatterns = [
     path('list-detail/<slug:title>/<slug:task>/change', views.task_update, name='task-update'),
     path('list-detail/<slug:title>/<slug:task>/delete/', views.task_delete, name='task-delete'),
     path('list-detail/<slug:title>/<slug:task>/delete-confirm/', views.task_delete_confirm, name='task-delete-confirm'),
+
+    path('search/', views.search_list_or_task, name='search'),
+
 ]
