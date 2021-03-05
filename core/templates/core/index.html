@@ -2,45 +2,80 @@
 {% load icons %}
 
 {% block body %}
+    <div class="d-flex flex-wrap ">
         {% for each in list %}
-            <div class="card pull-left mb-2 mr-2" style="width: 20rem;">
-                <div class="card-header">
-                    {% if each.is_pinned %}
-                        {% icon 'thumb-tack' title='Pinned' extra_classes='pr-2' %} {{ object.title|title }}
-                    {% endif %}
-                    <a href="{{ each.get_absolute_url }}">{{ each.title|capfirst }}</a>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush">
-                    {% for item in each.list.all|slice:":2" %}
-                        <li class="list-group-item">
-                            {{ item.title|capfirst }}
-                            <span class="badge text-light
-                            {% if item.action == 'pending' %} bg-secondary
-                            {% elif item.action == 'on-going' %} bg-warning
-                            {% elif item.action == 'completed' %} bg-success
-                            {% endif %}
-                            ">{{ item.action|title }}</span>
-                        </li>
-                    {% empty %}
-                    <li class="list-group-item">
-                        <small id="emailHelp" class="form-text text-muted">- Empty list</small>
-                    </li>
-                </li>                    
-                    {% endfor %}
-                    {% if each.list.count > 2 %}
-                    <li class="list-group-item">
-                        <a href="{{ each.get_absolute_url }}">More ...</a>
-                    </li>
-                    {% endif %}
-                </ul>
-                </div>
+        <div class="card p-0 mr-1 mb-1">
+            <div class="card-header px-3 py-1">
+                {% if each.is_pinned %}
+                    {% icon 'thumb-tack' title='Pinned' extra_classes='pr-2' %} {{ object.title|title }}
+                {% endif %}
+                <a href="{{ each.get_absolute_url }}">{{ each.title|capfirst }}</a>
             </div>
-            <!-- <hr> -->
-        <!-- </div> -->
-        {% endfor %}
-    <!-- </div> -->
-    <div class="row">
-        
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                {% for item in each.list.all|slice:":2" %}
+                    <li class="list-group-item">
+                        {{ item.title|capfirst }}
+                        <span class="badge text-light
+                        {% if item.action == 'pending' %} bg-secondary
+                        {% elif item.action == 'on-going' %} bg-warning
+                        {% elif item.action == 'completed' %} bg-success
+                        {% endif %}
+                        ">{{ item.action|title }}</span>
+                    </li>
+                {% empty %}
+                <li class="list-group-item">
+                    <small id="emailHelp" class="form-text text-muted">- Empty list</small>
+                </li>
+            </li>                    
+                {% endfor %}
+                {% if each.list.count > 2 %}
+                <li class="list-group-item">
+                    <a href="{{ each.get_absolute_url }}">More ...</a>
+                </li>
+                {% endif %}
+            </ul>
+            </div>
+        </div>
+        {% endfor %}    
+    </div>
+
+    <div class="d-flex flex-wrap">
+        <h2>Shared lists</h2>
+        {% for each in shared_list %}
+        <div class="card p-0 mr-1 mb-1">
+            <div class="card-header px-3 py-1">
+                {% if each.is_pinned %}
+                    {% icon 'thumb-tack' title='Pinned' extra_classes='pr-2' %} {{ object.title|title }}
+                {% endif %}
+                <a href="{{ each.get_absolute_url }}">{{ each.title|capfirst }}</a>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                {% for item in each.list.all|slice:":2" %}
+                    <li class="list-group-item">
+                        {{ item.title|capfirst }}
+                        <span class="badge text-light
+                        {% if item.action == 'pending' %} bg-secondary
+                        {% elif item.action == 'on-going' %} bg-warning
+                        {% elif item.action == 'completed' %} bg-success
+                        {% endif %}
+                        ">{{ item.action|title }}</span>
+                    </li>
+                {% empty %}
+                <li class="list-group-item">
+                    <small id="emailHelp" class="form-text text-muted">- Empty list</small>
+                </li>
+            </li>                    
+                {% endfor %}
+                {% if each.list.count > 2 %}
+                <li class="list-group-item">
+                    <a href="{{ each.get_absolute_url }}">More ...</a>
+                </li>
+                {% endif %}
+            </ul>
+            </div>
+        </div>
+        {% endfor %}    
     </div>
 {% endblock body %}

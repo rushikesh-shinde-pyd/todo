@@ -18,10 +18,13 @@ User = get_user_model()
 
 class CommonFields(models.Model):
     """ Base class for TODOLIST and TODOITEM class. """
-    title           =   models.CharField(max_length=50, unique=True) 
-    date_created    =   models.DateTimeField('created', auto_now_add=True, editable=False, blank=True)
-    date_updated    =   models.DateTimeField('updated', auto_now=True, editable=False, blank=True)
-    slug            =   models.SlugField(max_length=100, unique=True)
+    title           =   models.CharField(max_length=50, null=True, unique=True) 
+    date_created    =   models.DateTimeField('created', auto_now_add=True, editable=False, blank=True, null=True)
+    date_updated    =   models.DateTimeField('updated', auto_now=True, editable=False, blank=True, null=True)
+    slug            =   models.SlugField(max_length=100, unique=True, null=True)
+
+    class Meta:
+        abstract = True
 
 
 class Profile(models.Model):
@@ -41,6 +44,7 @@ class TodoList(CommonFields):
     """ Create todolist table. """
     user      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='lists', null=True)
     is_pinned = models.BooleanField(default=False, null=True) 
+    shared_with = models.ManyToManyField(User, related_name='shared_users')
 
     def get_absolute_url(self):
         return reverse('core:list-detail', kwargs={'title': self.slug})

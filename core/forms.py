@@ -145,9 +145,11 @@ class ListForm(forms.ModelForm):
         else:
             if not 2 < len(title) < 50:
                 raise ValidationError('Invalid list name')
+            # if TodoList.objects.filter()
         return title
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(

@@ -40,6 +40,8 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
 
+    'rest_framework',
+
     'django_icons',
     'crispy_forms',
 ]

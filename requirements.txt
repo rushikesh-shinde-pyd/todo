@@ -3,6 +3,7 @@ cryptography==3.4.6
 Django==2.2
 django-crispy-forms==1.11.1
 django-icons==2.2.1
+djangorestframework==3.12.2
 importlib-metadata==2.1.1
 pip-autoremove==0.9.1
 pycparser==2.20

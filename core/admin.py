@@ -5,7 +5,7 @@ from .models import TodoList, TodoItem, Profile
 
 @admin.register(TodoList)
 class TodoListAdmin(admin.ModelAdmin):
-    list_display    = ('title', 'is_pinned',)
+    list_display    = ('title', 'is_pinned', 'date_created', 'user')
     prepopulated_fields = {'slug': ('title',)}
 
     def get_full_name(self, obj):

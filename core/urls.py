@@ -23,4 +23,6 @@ urlpatterns = [
 
     path('search/', views.search_list_or_task, name='search'),
 
+    path('share/<slug:title>/', views.share_list, name='share'),
+
 ]

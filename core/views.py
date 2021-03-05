@@ -1,5 +1,6 @@
 # django imports
 from django.shortcuts import render, HttpResponseRedirect, reverse, HttpResponse
+from django.core.paginator import Paginator
 from django.http import HttpResponseNotAllowed
 from django.contrib import messages
 from django.shortcuts import redirect
@@ -15,7 +16,7 @@ from .models import *
 from .forms import SignupForm, ListForm, TaskForm
 
 # third-party imports
-from itertools import chain
+from itertools import chain 
 
 User = get_user_model()
 
@@ -23,9 +24,9 @@ User = get_user_model()
 @login_required
 def index(request):
     """ Renders lists created by logged in user. ie. homepage """
-
     context = {}
     context['list'] = TodoList.objects.filter(user=request.user)
+    context['shared_list'] = TodoList.objects.filter(shared_with=request.user)
     return render(request, 'core/index.html', context)
 
 
@@ -35,8 +36,9 @@ def list_create(request, *args, **kwargs):
     """ Create todo list with provided data and render empty form. """
     context = {}
     if request.method == 'POST':
-        form = ListForm(request.POST)
+        form = ListForm(request.POST, user=request.user)
         if form.is_valid():
+
             obj = form.save(commit=False)
             obj.user = request.user
             obj.save()
@@ -82,8 +84,12 @@ def list_detail(request, *args, **kwargs):
     """ Renders todo list details. """
     context = {}
     try:
-        obj = TodoList.objects.get(slug=kwargs.get('title'))
+        obj = TodoList.objects.get(slug=kwargs.get('title'), user=request.user)
+        paginator = Paginator(TodoItem.objects.filter(td_list=obj), 2)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
         context['object'] = obj
+        context['tasks'] = page_obj
         return render(request, 'core/list-detail.html', context)
     except TodoList.DoesNotExist as e:
         return HttpResponseRedirect(reverse('core:index'))
@@ -255,3 +261,26 @@ def search_list_or_task(request, *args, **kwargs):
             return render(request, 'core/search-results.html', context)
     else:
         return render(request, 'core/search-results.html', context)
+
+
+def share_list(request, *args, **kwargs):
+    """ 
+    Shares the todo list amoung the users.
+    Accept list of share-to user and saves obj  
+    """
+    context = {}
+    instance = TodoList.objects.get(slug=kwargs.get('title'))
+    if request.method == 'POST':
+        users = request.POST.getlist('users')
+        if len(users):
+            for each in users:
+                obj = User.objects.get(username=each)
+                instance.shared_with.add(obj)
+                messages.info(request, 'Shared successfully')
+            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+        else:
+            return HttpResponseRedirect(reverse('core:list-detail', kwargs={'title': instance.slug}))
+    else:
+        context['object'] = instance
+        context['users'] = User.objects.filter(is_active=True, is_staff=False).exclude(username=request.user.username)
+        return render(request, 'core/list-share.html', context)

@@ -1,14 +1,18 @@
 {% extends 'base.html' %}
 {% load icons %}
 
+{% block breadcrumb %}
+    <li class="breadcrumb-item active" aria-current="page">{{ object.title|title }}</li>
+{% endblock breadcrumb %}
+
 {% block title %}
-    {{ object.title|title }}
+    {{ object.title|title }} Share
 {% endblock title %}
 
 {% block body %}
     <div class="card">
-        <div class="card-header">
-            <div class="d-flex justify-content-between align-items-center">
+        <!-- <div class="card-header"> -->
+            <!-- <div class="d-flex justify-content-between align-items-center">
                 <div>
                     {% if object.is_pinned %}
                         {% icon 'thumb-tack' extra_classes='pr-2' %} 
@@ -16,16 +20,16 @@
                     {{ object.title|capfirst }}
                 </div>
                 <div class="btn-group btn-group-sm" role="group" aria-label="Basic mixed styles example">
-                    <a class="btn btn-outline-dark " href="{% url 'core:share' object.slug %}">Share {% icon 'share-alt' %}</a>
-                    <a class="btn btn-outline-dark " href="{% url 'core:task-create' object.slug %}">{% icon 'plus' title='Add task' %} Add a task</a>
-                    <a class="btn btn-outline-dark " href="{{ object.get_list_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
-                    <a class="btn btn-outline-dark " href="{{ object.get_list_delete_url }}">{% icon 'trash' title='Delete' %}</a>
+                    <a class="btn btn-outline-info ml-1" href="{{ object.get_list_delete_url }}">Share</a>
+                    <a class="btn btn-light ml-1 btn-outline-primary rounded-0" href="{% url 'core:task-create' object.slug %}">{% icon 'plus' title='Add task' %} Add a task</a>
+                    <a class="btn btn-primary rounded-circle ml-1" href="{{ object.get_list_update_url }}">{% icon 'edit (alias)' title='Edit' %}</a>
+                    <a class="btn btn-danger rounded-circle ml-1" href="{{ object.get_list_delete_url }}">{% icon 'trash' title='Delete' %}</a>
                 </div>       
-            </div>
-        </div>
-        <div class="card-body p-0">
+            </div> -->
+        <!-- </div> -->
+        <!-- <div class="card-body p-0">
             {% if object.list.count %}
-            <table class="table mb-0 table-responsive-sm table-borderless table-hover">
+            <table class="table mb-0 table-borderless table-hover">
                 <thead>
                   <tr>
                     <th scope="col">#</th>
@@ -89,7 +93,27 @@
                     {% endif %}
                 </ul>
             </nav>
-        </div>
+        </div> -->
+        <div class="card">
+            <div class="card-header">
+              Share {{ object.title|capfirst }}
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exampleFormControlSelect2">Select the users</label>
+                        <select multiple name="users" class="form-control" id="exampleFormControlSelect2">
+                          {% for user in users %}
+                              <option value="{{ user.username }}">{{ user.get_full_name|title }}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <input type="submit" class="w-100 btn btn-primary" value="Share"/>
+                </form>
+            </div>
+          </div>
+        
         </div>
     </div>
 {% endblock body %}
